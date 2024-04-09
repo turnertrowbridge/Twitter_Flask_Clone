@@ -2,26 +2,14 @@ from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from models.user import User
+from models.tweet import Tweet
+from models import db
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 app.config['SECRET_KEY'] = 'secret'
-db = SQLAlchemy(app)
-
-
-
-class Tweet(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    content = db.Column(db.String(200), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-
-    def __init__(self, content, user_id):
-        self.content = content
-        self.user_id = user_id
-
-    def __repr__(self):
-        return '<Tweet %r>' % self.content
-    
+db.init_app(app)
+   
 @app.route('/')
 def index():
     tweets = Tweet.query.all()
