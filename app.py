@@ -1,26 +1,14 @@
 from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from models.user import User
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 app.config['SECRET_KEY'] = 'secret'
 db = SQLAlchemy(app)
 
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), nullable=False)
-    password = db.Column(db.String(120), nullable=False)
-    email = db.Column(db.String(120), nullable=False)
-    tweets = db.relationship('Tweet', backref='user', lazy=True)
 
-    def __init__(self, username, password, email):
-        self.username = username
-        self.password = password
-        self.email = email
-
-    def __repr__(self):
-        return '<User %r>' % self.username
 
 class Tweet(db.Model):
     id = db.Column(db.Integer, primary_key=True)
