@@ -4,16 +4,28 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 from models.user import User
 from models.tweet import Tweet
 from models import db
+import secrets
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
-app.config['SECRET_KEY'] = 'secret'
+app.config['SECRET_KEY'] = secrets.token_urlsafe(16)
+
 db.init_app(app)
+login_manager = LoginManager(app)
+login_manager.login_view = 'login'
+
+   
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(user_id)
+   
    
 @app.route('/')
 def index():
     tweets = Tweet.query.all()
-    return render_template('index.html', tweets=tweets)
+    users = [user.username for user in User.query.all()]
+    return render_template('index.html', tweets=tweets, users=users)
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -25,23 +37,47 @@ def register():
         db.session.add(user)
         db.session.commit()
         return redirect(url_for('index'))
-    return render_template('register.html')
+    return redirect(url_for('index'))
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         user = User.query.filter_by(username=request.form['username'], password=request.form['password']).first()
         if user:
+            login_user(user)
             return redirect(url_for('index'))
-    return render_template('login.html')
+    return redirect(url_for('index'))
 
+   
+@app.route('/logout', methods=['GET', 'POST'])
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
+
+   
 @app.route('/tweet', methods=['POST'])
+@login_required
 def tweet():
-    tweet = Tweet(content=request.form['content'], user_id=1)  # Hard-coded user_id for simplicity
+    tweet = Tweet(content=request.form['content'], user_id=current_user.id)
     db.session.add(tweet)
     db.session.commit()
     return redirect(url_for('index'))
 
+@app.route('/delete_tweet', methods=['POST'])
+@login_required
+def delete_tweet():
+    tweet = Tweet.query.get(request.form['tweet_id'])
+    if tweet and tweet.user_id == current_user.id:
+        db.session.delete(tweet)
+        db.session.commit()
+    return redirect(url_for('index'))
+
+
+   
 if __name__ == '__main__':
     db.create_all()
+    login_manager.init_app(app)
     app.run()
+   
