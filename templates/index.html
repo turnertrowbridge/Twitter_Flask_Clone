@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask Twitter Clone</title>
+</head>
+<body>
+    <h1>Welcome to Flask Twitter Clone</h1>
+    
+    <h2>Register</h2>
+    <form action="/register" method="POST">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required><br>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required><br>
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required><br>
+        <input type="submit" value="Register">
+    </form>
+
+    <h2>Login</h2>
+    <form action="/login" method="POST">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required><br>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required><br>
+        <input type="submit" value="Login">
+    </form>
+
+    <h2>Post a Tweet</h2>
+    <form action="/tweet" method="POST">
+        <label for="content">Tweet Content:</label><br>
+        <textarea id="content" name="content" rows="4" cols="50" required></textarea><br>
+        <input type="submit" value="Tweet">
+    </form>
+    
+    <h2>Tweets</h2>
+    <ul>
+        {% for tweet in tweets %}
+        <li>{{tweet.id}} - {{tweet.content }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
+
