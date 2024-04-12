@@ -43,10 +43,10 @@ def register():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        user = User.query.filter_by(username=request.form['username'], password=request.form['password']).first()
+        user = User.query.filter_by(username=request.form['username']).first()
         if user:
-            login_user(user)
-            return redirect(url_for('index'))
+            if user.check_password(request.form['password']):
+                login_user(user)
     return redirect(url_for('index'))
 
    
