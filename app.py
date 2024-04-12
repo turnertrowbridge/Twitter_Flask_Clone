@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from models.user import User
@@ -75,7 +75,44 @@ def delete_tweet():
     return redirect(url_for('index'))
 
 
-   
+@app.route('/user/<username>')
+def user(username):
+    user = User.query.filter_by(username=username).first_or_404()
+    num_followers = user.followers.count()
+    num_following = user.following.count()
+    return render_template('profile.html', current_user=current_user, user=user, num_followers=num_followers, num_following=num_following, tweets=user.tweets)
+
+
+@app.route('/follow/<username>', methods=['POST'])
+@login_required
+def follow(username):
+    user = User.query.filter_by(username=username).first()
+    if not user:
+        flash(f'User {username} does not exist.')
+        return redirect(url_for('index'))
+
+    current_user.following.append(user)
+    db.session.commit()
+
+    flash(f'Successfully followed {username}.')
+    return redirect(url_for('user', username=user.username))
+
+
+@app.route('/unfollow/<username>', methods=['POST'])
+@login_required
+def unfollow(username):
+    user = User.query.filter_by(username=username).first()
+    if not user:
+        flash(f'User {username} does not exist.')
+        return redirect(url_for('index'))
+
+    current_user.following.remove(user)
+    db.session.commit()
+
+    flash(f'Successfully unfollowed {username}.')
+    return redirect(url_for('user', username=user.username))
+
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()

@@ -53,7 +53,7 @@
     <ul>
         {% for tweet in tweets %}
         <li>
-            <div><b>@{{ tweet.user.username }}</b></div>
+            <div><b><a href="{{ url_for('user', username=tweet.user.username) }}">@{{ tweet.user.username }}</a></b></div>
             <div><i>{{ tweet.created_at.strftime('%Y-%m-%d %I:%M %p') }}</i></div>
             <div>{{tweet.content}}</div>
         </li>

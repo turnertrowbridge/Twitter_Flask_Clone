@@ -1,6 +1,6 @@
 from . import db
 from flask_login import UserMixin
-from .follower_db import followers
+from .follower_db import follow_info
 
 
 class User(UserMixin, db.Model):
@@ -12,9 +12,9 @@ class User(UserMixin, db.Model):
 
     following = db.relationship(
         'User',
-        secondary=followers,
-        primaryjoin=(followers.c.follower_id == id),
-        secondaryjoin=(followers.c.followed_id == id),
+        secondary=follow_info,
+        primaryjoin=(follow_info.c.follower_id == id),
+        secondaryjoin=(follow_info.c.followed_id == id),
         backref=db.backref('followers', lazy='dynamic'),
         lazy='dynamic',
     )
