@@ -19,19 +19,21 @@ login_manager.login_view = 'login'
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(user_id)
-
+    return db.session.get(User, user_id)
 
 @app.route('/')
 def index():
-    tweets = Tweet.query.all()
-
     # Sort Tweets by created at and fetch first 20 records
     tweets = Tweet.query.order_by(Tweet.created_at.desc()).limit(20).all()
-
     # Get all user's usernames
     usernames = [user.username for user in User.query.all()]
-    return render_template('index.html', tweets=tweets, usernames=usernames)
+    following_tweets = None
+
+    # Fetch tweets of users that current user is following
+    if current_user.is_authenticated:
+        following_tweets = (
+            Tweet.query.join(User, User.id == Tweet.user_id)).filter(User.id.in_([user.id for user in current_user.following])).order_by(Tweet.created_at.desc()).limit(20).all()
+    return render_template('index.html', tweets=tweets, usernames=usernames, following_tweets=following_tweets)
 
 
 @app.route('/register', methods=['POST'])
@@ -92,8 +94,8 @@ def delete_tweet():
 @app.route('/user/<username>')
 def user(username):
     user = User.query.filter_by(username=username).first_or_404()
-    num_followers = user.followers.count()
-    num_following = user.following.count()
+    num_followers = user.followers.count() - 1
+    num_following = user.following.count() - 1
     return render_template('profile.html', current_user=current_user, user=user, num_followers=num_followers,
                            num_following=num_following, tweets=user.tweets)
 

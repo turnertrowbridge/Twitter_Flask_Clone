@@ -30,6 +30,7 @@ class User(UserMixin, db.Model):
         self.username = username
         self.password = generate_password_hash(password)
         self.email = email
+        self.following.append(self)
 
     def __repr__(self):
         return '<User %r>' % self.username
