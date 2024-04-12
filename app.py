@@ -25,8 +25,8 @@ def load_user(user_id):
 @app.route('/')
 def index():
     tweets = Tweet.query.all()
-    users = [user.username for user in User.query.all()]
-    return render_template('index.html', tweets=tweets, users=users)
+    usernames = [user.username for user in User.query.all()]
+    return render_template('index.html', tweets=tweets, usernames=usernames)
 
 
 @app.route('/register', methods=['POST'])

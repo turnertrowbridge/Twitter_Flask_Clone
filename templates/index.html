@@ -79,8 +79,8 @@
 
 <h2>Users</h2>
 <ul>
-    {% for user in users %}
-        <li>{{ user }}</li>
+    {% for username in usernames %}
+        <li><a href="{{ url_for('user', username=username) }}">{{ username}}</a></li>
     {% endfor %}
 </ul>
 </body>
