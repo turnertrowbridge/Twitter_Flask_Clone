@@ -8,14 +8,24 @@
 </head>
 
 <body>
-    <h1>Welcome to Flask Twitter Clone</h1>
+<h1>Welcome to Flask Twitter Clone</h1>
 
-    {%if current_user.is_authenticated%}
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <ul class=flashes>
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endwith %}
+
+{% if current_user.is_authenticated %}
     <h2>Welcome, {{ current_user.username }}</h2>
     <form action="/logout" method="POST">
         <input type="submit" value="Logout">
     </form>
-    {% else %}
+{% else %}
 
     <h2>Register</h2>
     <form action="/register" method="POST">
@@ -36,42 +46,43 @@
         <input type="password" id="password" name="password" required><br>
         <input type="submit" value="Login">
     </form>
-    {% endif %}
+{% endif %}
 
-    {%if current_user.is_authenticated%}
+{% if current_user.is_authenticated %}
     <h2>Post a Tweet</h2>
     <form action="/tweet" method="POST">
         <label for="content">Tweet Content:</label><br>
         <textarea id="content" name="content" rows="4" cols="50" required></textarea><br>
         <input type="submit" value="Tweet">
     </form>
-    {% else %}
+{% else %}
     <h2>Login to post a tweet</h2>
-    {% endif %}
+{% endif %}
 
-    <h2>Tweets</h2>
-    <ul>
-        {% for tweet in tweets %}
+<h2>Tweets</h2>
+<ul>
+    {% for tweet in tweets %}
         <li>
-            <div><b><a href="{{ url_for('user', username=tweet.user.username) }}">@{{ tweet.user.username }}</a></b></div>
+            <div><b><a href="{{ url_for('user', username=tweet.user.username) }}">@{{ tweet.user.username }}</a></b>
+            </div>
             <div><i>{{ tweet.created_at.strftime('%Y-%m-%d %I:%M %p') }}</i></div>
-            <div>{{tweet.content}}</div>
+            <div>{{ tweet.content }}</div>
         </li>
         {% if current_user.is_authenticated and tweet.user.id == current_user.id %}
-        <form action="/delete_tweet" method="POST">
-            <input type="hidden" name="tweet_id" value="{{tweet.id}}">
-            <input type="submit" value="Delete">
-        </form>
+            <form action="/delete_tweet" method="POST">
+                <input type="hidden" name="tweet_id" value="{{ tweet.id }}">
+                <input type="submit" value="Delete">
+            </form>
         {% endif %}
-        {% endfor %}
-    </ul>
+    {% endfor %}
+</ul>
 
-    <h2>Users</h2>
-    <ul>
-        {% for user in users %}
-        <li>{{user}}</li>
-        {% endfor %}
-    </ul>
+<h2>Users</h2>
+<ul>
+    {% for user in users %}
+        <li>{{ user }}</li>
+    {% endfor %}
+</ul>
 </body>
 
 </html>

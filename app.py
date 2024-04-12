@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from werkzeug.security import generate_password_hash
+
 from models.user import User
 from models.tweet import Tweet
 from models import db
@@ -14,12 +16,12 @@ db.init_app(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
-   
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(user_id)
-   
-   
+
+
 @app.route('/')
 def index():
     tweets = Tweet.query.all()
@@ -27,36 +29,42 @@ def index():
     return render_template('index.html', tweets=tweets, users=users)
 
 
-@app.route('/register', methods=['GET', 'POST'])
+@app.route('/register', methods=['POST'])
 def register():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        email = request.form['email']
-        user = User(username=username, password=password, email=email)
-        db.session.add(user)
-        db.session.commit()
+    existing_user = User.query.filter_by(username=request.form['username']).first()
+    if existing_user:
+        flash('The username already exists.')
+        print('The username already exists.')
         return redirect(url_for('index'))
+
+    # Create a new user
+    new_user = User(
+        username=request.form['username'],
+        password=request.form['password'],
+        email=request.form['email']
+    )
+    db.session.add(new_user)
+    db.session.commit()
     return redirect(url_for('index'))
 
 
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/login', methods=['POST'])
 def login():
-    if request.method == 'POST':
-        user = User.query.filter_by(username=request.form['username']).first()
-        if user:
-            if user.check_password(request.form['password']):
-                login_user(user)
+    user = User.query.filter_by(username=request.form['username']).first()
+    if user:
+        if user.check_password(request.form['password']):
+            login_user(user)
+
     return redirect(url_for('index'))
 
-   
+
 @app.route('/logout', methods=['GET', 'POST'])
 @login_required
 def logout():
     logout_user()
     return redirect(url_for('index'))
 
-   
+
 @app.route('/tweet', methods=['POST'])
 @login_required
 def tweet():
@@ -64,6 +72,7 @@ def tweet():
     db.session.add(tweet)
     db.session.commit()
     return redirect(url_for('index'))
+
 
 @app.route('/delete_tweet', methods=['POST'])
 @login_required
@@ -80,7 +89,8 @@ def user(username):
     user = User.query.filter_by(username=username).first_or_404()
     num_followers = user.followers.count()
     num_following = user.following.count()
-    return render_template('profile.html', current_user=current_user, user=user, num_followers=num_followers, num_following=num_following, tweets=user.tweets)
+    return render_template('profile.html', current_user=current_user, user=user, num_followers=num_followers,
+                           num_following=num_following, tweets=user.tweets)
 
 
 @app.route('/follow/<username>', methods=['POST'])
@@ -118,4 +128,3 @@ if __name__ == '__main__':
         db.create_all()
     login_manager.init_app(app)
     app.run()
-   
