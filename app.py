@@ -25,6 +25,11 @@ def load_user(user_id):
 @app.route('/')
 def index():
     tweets = Tweet.query.all()
+
+    # Sort Tweets by created at and fetch first 20 records
+    tweets = Tweet.query.order_by(Tweet.created_at.desc()).limit(20).all()
+
+    # Get all user's usernames
     usernames = [user.username for user in User.query.all()]
     return render_template('index.html', tweets=tweets, usernames=usernames)
 

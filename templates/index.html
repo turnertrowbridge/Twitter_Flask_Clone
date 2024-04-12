@@ -80,7 +80,7 @@
 <h2>Users</h2>
 <ul>
     {% for username in usernames %}
-        <li><a href="{{ url_for('user', username=username) }}">{{ username}}</a></li>
+        <li><a href="{{ url_for('user', username=username) }}">@{{ username}}</a></li>
     {% endfor %}
 </ul>
 </body>
