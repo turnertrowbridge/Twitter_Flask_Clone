@@ -21,6 +21,7 @@ login_manager.login_view = 'login'
 def load_user(user_id):
     return db.session.get(User, user_id)
 
+
 @app.route('/')
 def index():
     # Sort Tweets by created at and fetch first 20 records
@@ -38,7 +39,8 @@ def index():
 
 @app.route('/register', methods=['POST'])
 def register():
-    existing_user = User.query.filter_by(username=request.form['username']).first()
+    existing_user = User.query.filter_by(
+        username=request.form['username']).first()
     if existing_user:
         flash('The username already exists.')
         print('The username already exists.')
@@ -78,6 +80,26 @@ def tweet():
     tweet = Tweet(content=request.form['content'], user_id=current_user.id)
     db.session.add(tweet)
     db.session.commit()
+    return redirect(url_for('index'))
+
+
+@app.route('/<tweet_id>/like', methods=['POST'])
+@login_required
+def like(tweet_id):
+    tweet = Tweet.query.get(tweet_id)
+    if tweet:
+        tweet.likes.append(current_user)
+        db.session.commit()
+    return redirect(url_for('index'))
+
+
+@app.route('/<tweet_id>/unlike', methods=['POST'])
+@login_required
+def unlike(tweet_id):
+    tweet = Tweet.query.get(tweet_id)
+    if tweet and current_user in tweet.likes:
+        tweet.likes.remove(current_user)
+        db.session.commit()
     return redirect(url_for('index'))
 
 

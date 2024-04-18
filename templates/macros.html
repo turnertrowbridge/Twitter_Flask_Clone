@@ -1,0 +1,22 @@
+{% macro tweet_element(tweet, current_user) %}
+
+    <li>
+        <div><b><a href="{{ url_for('user', username=tweet.user.username) }}">@{{ tweet.user.username }}</a></b>
+        </div>
+        <div><i>{{ tweet.created_at.strftime('%Y-%m-%d %I:%M %p') }}</i></div>
+        <div>{{ tweet.content }}</div>
+    </li>
+    {% if current_user.is_authenticated and tweet.user.id == current_user.id %}
+        <form action="{{ url_for('like', tweet_id=tweet.id) }}" method="POST">
+            <input type="submit" value="Like">
+        </form>
+        <form action="{{ url_for('unlike', tweet_id=tweet.id) }}" method="POST">
+            <input type="submit" value="Unlike">
+        </form>
+        <form action="/delete_tweet" method="POST">
+            <input type="hidden" name="tweet_id" value="{{ tweet.id }}">
+            <input type="submit" value="Delete">
+        </form>
+    {% endif %}
+
+{% endmacro %}

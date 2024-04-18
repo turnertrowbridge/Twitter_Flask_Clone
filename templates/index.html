@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+{% import 'macros.html' as macros %}
 
 <head>
     <meta charset="UTF-8">
@@ -64,18 +65,7 @@
     {% if following_tweets %}
         <ul>
             {% for tweet in following_tweets %}
-                <li>
-                    <div><b><a href="{{ url_for('user', username=tweet.user.username) }}">@{{ tweet.user.username }}</a></b>
-                    </div>
-                    <div><i>{{ tweet.created_at.strftime('%Y-%m-%d %I:%M %p') }}</i></div>
-                    <div>{{ tweet.content }}</div>
-                </li>
-                {% if current_user.is_authenticated and tweet.user.id == current_user.id %}
-                    <form action="/delete_tweet" method="POST">
-                        <input type="hidden" name="tweet_id" value="{{ tweet.id }}">
-                        <input type="submit" value="Delete">
-                    </form>
-                {% endif %}
+                {{ macros.tweet_element(tweet, current_user) }}
             {% endfor %}
         </ul>
     {% else %}
@@ -86,18 +76,7 @@
 <h2>All Tweets</h2>
 <ul>
     {% for tweet in tweets %}
-        <li>
-            <div><b><a href="{{ url_for('user', username=tweet.user.username) }}">@{{ tweet.user.username }}</a></b>
-            </div>
-            <div><i>{{ tweet.created_at.strftime('%Y-%m-%d %I:%M %p') }}</i></div>
-            <div>{{ tweet.content }}</div>
-        </li>
-        {% if current_user.is_authenticated and tweet.user.id == current_user.id %}
-            <form action="/delete_tweet" method="POST">
-                <input type="hidden" name="tweet_id" value="{{ tweet.id }}">
-                <input type="submit" value="Delete">
-            </form>
-        {% endif %}
+    {{ macros.tweet_element(tweet, current_user) }}
     {% endfor %}
 </ul>
 
